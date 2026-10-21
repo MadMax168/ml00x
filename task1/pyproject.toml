@@ -1,0 +1,6 @@
+[project]
+name = "task1"
+version = "0.1.0"
+description = "Task 1: anti-cheat binary classification"
+requires-python = ">=3.12"
+dependencies = []

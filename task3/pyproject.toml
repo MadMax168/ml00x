@@ -1,0 +1,6 @@
+[project]
+name = "task3"
+version = "0.1.0"
+description = "Task 3: monthly spending regression"
+requires-python = ">=3.12"
+dependencies = []

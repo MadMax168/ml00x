@@ -1,0 +1,6 @@
+[project]
+name = "task4"
+version = "0.1.0"
+description = "Task 4: game title image classification"
+requires-python = ">=3.12"
+dependencies = []

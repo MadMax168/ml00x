@@ -29,10 +29,10 @@ Each task folder holds:
 
 - `pyproject.toml`, `uv.lock`, `.python-version`: the task's dependencies and Python version. Commit all three.
 - `.venv/`: the task's virtual environment. uv creates it.
-- `.gitignore`: the task's ignore rules. Ignore `.venv/`, `data/`, model checkpoints, and generated predictions.
-- `data/`: the task's Kaggle files. Download them here. Git ignores this folder.
-- `models/`: saved model checkpoints. Git ignores this folder.
-- `predictions/`: generated prediction files. Git ignores this folder.
+- `.gitignore`: the task's ignore rules. Ignore `.venv/`. Do not ignore `data/`, `models/`, or `predictions/`.
+- `data/`: the task's Kaggle files. Download them here and commit them.
+- `models/`: saved model checkpoints. Commit them.
+- `predictions/`: generated prediction files. Commit them.
 - `assets/`: report figures and tables that notebooks and scripts generate. Commit this folder.
 
 Rules for report assets:

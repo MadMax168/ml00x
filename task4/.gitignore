@@ -6,17 +6,3 @@ __pycache__/
 # uv virtual environment
 .venv/
 
-# Kaggle data
-data/
-
-# Model checkpoints
-models/
-*.pt
-*.pth
-*.ckpt
-*.joblib
-*.pkl
-
-# Generated predictions
-predictions/
-submission*.csv

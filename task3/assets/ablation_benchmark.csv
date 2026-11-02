@@ -1,0 +1,5 @@
+Model Paradigm,Architecture,OOF MAE (THB),OOF NMAE Score,Delta vs Challenge (0.75)
+1. Constant Median Baseline,Single Scalar Point Estimator,10495.48,0.5000,-0.2500
+2. Standalone LightGBM Hurdle,P(Spend) * Log-L1 Regressor + Direct L1,2879.38,0.7847,+0.0347
+3. Standalone CatBoost Hurdle,P(Spend) * Log-L1 Regressor + Direct L1,2862.14,0.7858,+0.0358
+4. Tri-Model Ensembled Bayes-Hurdle (Optimal),LightGBM + CatBoost + XGBoost Tri-Stage Convex Blend,2809.54,0.7889,+0.0389

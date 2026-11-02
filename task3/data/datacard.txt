@@ -1,0 +1,120 @@
+TASK 3: MONTHLY SPENDING PREDICTION
+================================================================================
+
+TARGET VARIABLE: spending_30d (Continuous)
+Predicted spending amount in THB for next 30 days
+
+FEATURES (32 features):
+
+1. friend_count (float)
+   Number of in-game friends
+
+2. social_interactions (float)
+   Weekly gifts, trades, team activities
+
+3. guild_membership (float)
+   Guild[1]/clan membership status
+
+4. event_participation_rate (float)
+   Percentage of limited-time events[2] joined
+
+5. daily_login_streak (float)
+   Current consecutive daily login streak
+
+6. avg_session_length (float)
+   Average session duration in minutes
+
+7. sessions_per_week (float)
+   Number of play sessions per week
+
+8. total_playtime_hours (float)
+   Lifetime cumulative playtime
+
+9. days_since_last_login (float)
+   Days since most recent login
+
+10. achievement_count (float)
+    Total achievements[3] unlocked
+
+11. achievement_completion_rate (float)
+    Percentage of all achievements[3] completed
+
+12. historical_spending (float)
+    Historical spending over past periods
+
+13. prev_month_spending (float)
+    Actual spending in the previous month
+
+14. total_transactions (float)
+    Total number of transactions
+
+15. avg_transaction_value (float)
+    Average value per transaction
+
+16. account_age_days (float)
+    Days since account creation
+
+17. vip_status (float)
+    Current VIP[4] tier level
+
+18. is_premium_member (float)
+    Premium membership status
+
+19. primary_game (float)
+    Main game played (encoded as integer)
+
+20. games_played (float)
+    Number of different Karena games played
+
+21. cross_game_activity (float)
+    Play sessions across multiple games
+
+22. platform (float)
+    Primary gaming platform (encoded)
+
+23. days_since_last_purchase (float)
+    Days since most recent purchase
+
+24. purchase_frequency (float)
+    Average frequency of purchases
+
+25. payment_methods_used (float)
+    Number of different payment methods used
+
+26. purchases_on_discount (float)
+    Number of purchases made during sales
+
+27. discount_rate_used (float)
+    Average discount rate utilized
+
+28. seasonal_spending_pattern (float)
+    Historical spending variation by month/season
+
+29. owns_limited_edition (float)
+    Ownership of limited edition[5] items
+
+30. competitive_rank (float)
+    Current competitive ranking
+
+31. tournament_participation (float)
+    Participation in tournaments[6]
+
+32. segment (float)
+    Player segment classification from Task 2
+
+
+================================================================================
+GAME TERMINOLOGY DEFINITIONS
+================================================================================
+
+[1] Guild/Clan - A group or team of players who play together regularly
+
+[2] Event - Special limited-time in-game activities or challenges with unique rewards
+
+[3] Achievement - In-game goal or milestone that rewards players for completing specific tasks
+
+[4] VIP - Premium membership tier offering special benefits to paying members
+
+[5] Limited Edition - Rare items only available for a short time period
+
+[6] Tournament - Organized competitive event where players compete for prizes or recognition

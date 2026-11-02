@@ -1,38 +1,43 @@
 name: Submit to Kaggle
 
-# Manual only: Actions → Submit to Kaggle → Run workflow. Anyone with write access can run it.
+# Runs on each push to main that changes a submission file.
+# Manual run: Actions → Submit to Kaggle → Run workflow.
 on:
+  push:
+    branches: [main]
+    paths:
+      - submission/**
+      - task*/submit/**
   workflow_dispatch:
     inputs:
       message:
         description: Submission note (the commit SHA is added automatically)
-        required: true
+        required: false
         type: string
+      force:
+        description: Submit even if Kaggle already has this file
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
-# One submission at a time. Never cancel a submission that is already running.
-concurrency:
-  group: kaggle-submit
-  cancel-in-progress: false
+env:
+  KAGGLE: uvx --from kaggle==2.2.5 --with six kaggle
 
 jobs:
-  submit:
+  # A newer run cancels this job. It never talks to Kaggle, so a cancel costs no submission.
+  prepare:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    env:
-      KAGGLE_API_TOKEN: ${{ secrets.KAGGLE_API_TOKEN }}
-      KAGGLE_COMPETITION: ${{ vars.KAGGLE_COMPETITION }}
+    concurrency:
+      group: kaggle-prepare
+      cancel-in-progress: true
+    outputs:
+      hash: ${{ steps.hash.outputs.hash }}
     steps:
-      - name: Check configuration
-        run: |
-          missing=0
-          if [ -z "$KAGGLE_API_TOKEN" ]; then echo "::error::Set repository secret KAGGLE_API_TOKEN"; missing=1; fi
-          if [ -z "$KAGGLE_COMPETITION" ]; then echo "::error::Set repository variable KAGGLE_COMPETITION"; missing=1; fi
-          exit "$missing"
-
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           sparse-checkout: |
             submission
@@ -43,33 +48,78 @@ jobs:
             task5/submit
           sparse-checkout-cone-mode: true
 
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
 
       - name: Check and merge
         run: |
           set -o pipefail
           uv run submission/merge.py | tee -a "$GITHUB_STEP_SUMMARY"
 
+      - name: Hash merged submission
+        id: hash
+        run: echo "hash=$(sha256sum submission/submission.csv | cut -c1-12)" >> "$GITHUB_OUTPUT"
+
       - name: Upload merged submission
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: submission-${{ github.sha }}
           path: submission/submission.csv
           if-no-files-found: error
 
+  # One submit at a time, and a running submit is never cancelled: it may already use a daily slot.
+  # GitHub keeps only the newest waiting run in this group, so older waiting runs drop out.
+  submit:
+    needs: prepare
+    runs-on: ubuntu-latest
+    concurrency:
+      group: kaggle-submit
+      cancel-in-progress: false
+    env:
+      KAGGLE_API_TOKEN: ${{ secrets.KAGGLE_API_TOKEN }}
+      KAGGLE_COMPETITION: ${{ vars.KAGGLE_COMPETITION }}
+      HASH: ${{ needs.prepare.outputs.hash }}
+    steps:
+      - name: Check configuration
+        run: |
+          missing=0
+          if [ -z "$KAGGLE_API_TOKEN" ]; then echo "::error::Set repository secret KAGGLE_API_TOKEN"; missing=1; fi
+          if [ -z "$KAGGLE_COMPETITION" ]; then echo "::error::Set repository variable KAGGLE_COMPETITION"; missing=1; fi
+          exit "$missing"
+
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: submission-${{ github.sha }}
+
+      # Each note holds a `[sha:<hash>]` tag of its file, so Kaggle itself records what it already has.
+      # The check runs here, inside the serial group, so two runs of one file cannot both pass it.
+      - name: Look for an earlier submission of this file
+        id: seen
+        if: ${{ !inputs.force }}
+        run: |
+          list=$($KAGGLE competitions submissions "$KAGGLE_COMPETITION" --csv --page-size 200 -q)
+          if grep -qF "[sha:$HASH]" <<< "$list"; then
+            echo "::notice::Kaggle already has this submission file (sha $HASH). Skipped the submit."
+            echo "Kaggle already has this submission file (sha \`$HASH\`). Skipped the submit." >> "$GITHUB_STEP_SUMMARY"
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Submit and wait for score
+        if: steps.seen.outputs.found != 'true'
         env:
-          MESSAGE: ${{ inputs.message }}
+          MESSAGE: ${{ inputs.message || github.event.head_commit.message }}
         run: |
           set -o pipefail
-          note="${GITHUB_SHA::7} ${MESSAGE} (by ${GITHUB_ACTOR})"
+          MESSAGE="${MESSAGE%%$'\n'*}"
+          note="${GITHUB_SHA::7} [sha:$HASH] ${MESSAGE} (by ${GITHUB_ACTOR})"
           {
             echo "## Kaggle"
             echo
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-          uvx --from kaggle==2.2.5 --with six kaggle competitions submit "$KAGGLE_COMPETITION" \
-            -f submission/submission.csv -m "$note" --wait 900 \
+          $KAGGLE competitions submit "$KAGGLE_COMPETITION" \
+            -f submission.csv -m "$note" --wait 900 \
             | tee -a "$GITHUB_STEP_SUMMARY"
           echo '```' >> "$GITHUB_STEP_SUMMARY"
 
@@ -80,6 +130,6 @@ jobs:
             echo "### Recent submissions"
             echo
             echo '```'
-            uvx --from kaggle==2.2.5 --with six kaggle competitions submissions "$KAGGLE_COMPETITION" | head -n 12
+            $KAGGLE competitions submissions "$KAGGLE_COMPETITION" | head -n 12
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"

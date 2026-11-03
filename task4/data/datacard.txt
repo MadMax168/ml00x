@@ -1,0 +1,24 @@
+TASK 4: GAME TITLE DETECTION
+================================================================================
+
+TARGET VARIABLE: class (Categorical)
+Game title classification label - 5 different games
+   0: 7-11 Knights
+   1: FiveN
+   2: Free Fried
+   3: PUBE
+   4: Roblock
+
+IMAGE DATA:
+
+1. id (object)
+   Unique identifier linking to image files
+   File mapping: train.csv → tasks/04_image_classification/data/train/{id}.jpg
+                test.csv  → tasks/04_image_classification/data/test/{id}.jpg
+
+2. Image Files (RGB array)
+   Gameplay screenshot images from live streams, player submissions, community forums and support tickets.
+   Resolution: 230×120 pixels (center-cropped from 256×144)
+   Channels: 3 (RGB)
+   Color depth: 8-bit per channel
+   Format: JPEG

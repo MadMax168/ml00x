@@ -10,3 +10,6 @@ __pycache__/
 data/train/*.jpg
 data/test/*.jpg
 
+# Downloaded pretrained-weight cache; keep the trained checkpoint instead.
+models/torch-cache/
+
